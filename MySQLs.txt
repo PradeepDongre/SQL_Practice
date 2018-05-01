@@ -1,0 +1,191 @@
+MySQL Binary Tree Node
+select n, case when (p is null) then 'Root' when (n in (select p from bst)) then 'Inner'else 'Leaf' end from bst order by n;
+
+MySQL  Triangle
+select
+case
+   when (a+b)>c and (b+c)>a and (a+c)>b  
+   then (case when a=b and b=c then "Equilateral"
+         when a <> b and b <> c and c <> a then "Scalene"
+         else "Isosceles"
+    end)
+   else "Not A Triangle"
+end 
+from triangles;
+
+MySQL  The PADS
+Select concat(name,"(",(Left(Occupation,1)),")") From Occupations Order by name; 
+Select concat("There are a total of"," ",count(occupation), " ", lower(occupation), "s.") From occupations Group by occupation Order by count(occupation), occupation;
+
+MySQL New companies
+select c.company_code, max(c.founder), count(distinct l.lead_manager_code), count(distinct s.senior_manager_code), count(distinct m.manager_code),count(distinct e.employee_code) from Company c, Lead_Manager l, Senior_Manager s, Manager m, Employee e where c.company_code = l.company_code and l.lead_manager_code=s.lead_manager_code and s.senior_manager_code=m.senior_manager_code and m.manager_code=e.manager_code group by c.company_code order by c.company_code;
+
+MYSQL Aggregation
+
+SELECT COUNT(id)
+FROM city
+WHERE population > 100000;
+
+select sum(population) 
+from city 
+where district='California';
+
+SELECT FLOOR(AVG(POPULATION)) FROM CITY;
+
+SELECT SUM(POPULATION) FROM CITY  WHERE COUNTRYCODE ='JPN';
+
+SELECT MAX(population) - MIN(population) FROM city;
+
+Broken 0 key
+SELECT CEIL(AVG(Salary)-AVG(REPLACE(Salary,'0',''))) FROM EMPLOYEES;
+
+select (salary * months)as earnings ,count(*) from employee group by 1 order by earnings desc limit 1; --group by 1 and order by earnings both are same.
+
+SELECT ROUND( SUM( LAT_N ),2 ),ROUND( SUM( LONG_W ),2 ) FROM STATION 
+
+select round(sum(lat_n),4) from station where lat_n between 38.7880 and 137.2345; --between is inclusive
+select round(sum(lat_n),4) from station where lat_n > 38.7880 and lat_n < 137.2345; --Accurate one
+
+SELECT TRUNCATE(MAX(lat_n),4) FROM station WHERE lat_n < 137.2345;
+
+Select round(long_w,4) from Station where lat_n < 137.2345 order by lat_n desc limit 1;
+
+
+WS 17
+SELECT 
+    ROUND(MIN(LAT_N), 4)
+FROM
+    STATION
+WHERE
+    LAT_N > 38.7780;
+	
+select round(long_w,4)
+from station
+group by lat_n asc, long_w
+having lat_n > 38.778
+limit 1
+
+
+WS 18
+
+SELECT ROUND(ABS(MIN(LAT_N) - MAX(LAT_N)) + ABS(MIN(LONG_W) - MAX(LONG_W)),4) FROM STATION
+
+WS 19
+SELECT
+    ROUND(SQRT(
+        POWER(MAX(LAT_N)  - MIN(LAT_N),  2)
+      + POWER(MAX(LONG_W) - MIN(LONG_W), 2)
+    ), 4)
+FROM 
+    STATION;
+	
+WS 20 MS SQL SERVER
+	With CTE AS
+(
+Select
+    LAT_N,
+    Row_Number() over (order by LAT_N asc) as LATA,
+    Row_Number() over (order by LAT_N Desc) as LATD
+From
+    Station
+)
+Select
+    CAST(Round(AVG(LAT_N),4) as NUMERIC(12,4))
+From
+    CTE
+Where
+    LATA in (LATD, LATD-1,LATD+1)
+	
+MySQL	
+	Select round(S.LAT_N,4) mediam from station S where (select count(Lat_N) from station where Lat_N < S.LAT_N ) = (select count(Lat_N) from station where Lat_N > S.LAT_N)
+	
+Join 
+
+select sum(city.population)
+from city
+join country
+on city.countrycode = country.code
+where continent = 'Asia';
+
+select city.name
+from city
+join country
+on city.countrycode = country.code
+where continent = 'Africa';
+
+select c.continent,floor(avg(ci.population)) as 'avg_population'
+from city ci
+inner join country c
+ON ci.countrycode = c.code
+group by c.continent order by 1;
+
+SET @value = .5432167890
+SELECT ROUND(@value, 1)  -- 0.5000000000 
+SELECT ROUND(@value, 2)  -- 0.5400000000
+SELECT ROUND(@value, 3)  -- 0.5430000000
+SELECT ROUND(@value, 4)  -- 0.5432000000
+SELECT ROUND(@value, 5)  -- 0.5432200000
+SELECT ROUND(@value, 6)  -- 0.5432170000
+SELECT ROUND(@value, 7)  -- 0.5432168000
+SELECT ROUND(@value, 8)  -- 0.5432167900
+SELECT ROUND(@value, 9)  -- 0.5432167890
+SELECT ROUND(@value, 10) -- 0.5432167890
+SELECT CEILING(@value)   -- 1
+SELECT FLOOR(@value)     -- 0
+
+select 
+case when grade<8 then 'NULL' else s.name end,g.grade,s.marks 
+from students s,grades g where s.marks between g.min_mark and g.max_mark order by grade desc,s.name;
+
+SELECT s.hacker_id, h.name
+FROM Submissions S
+JOIN Challenges C
+ON S.challenge_id = C.challenge_id
+JOIN Difficulty D
+ON C.difficulty_level = D.difficulty_level
+JOIN Hackers H
+ON S.hacker_id = H.hacker_id 
+WHERE S.score = d.score
+GROUP BY h.hacker_id, h.name
+HAVING COUNT(s.hacker_id) > 1
+ORDER BY COUNT(s.hacker_id) DESC, s.hacker_id
+
+select 
+w.id, p.age, w.coins_needed, w.power 
+from Wands as w join Wands_Property as p on (w.code = p.code) 
+where 
+p.is_evil = 0 and w.coins_needed = (select min(coins_needed) from Wands as w1 join Wands_Property as p1 on (w1.code = p1.code) where w1.power = w.power and p1.age = p.age) 
+order by w.power desc, p.age desc
+
+select h.hacker_id, name, sum(score) as total_score
+from
+hackers as h inner join
+/* find max_score*/
+(select hacker_id,  max(score) as score from submissions group by challenge_id, hacker_id) max_score
+
+on h.hacker_id=max_score.hacker_id
+group by h.hacker_id, name
+
+/* don't accept hackers with total_score=0 */
+having total_score > 0
+
+/* finally order as required */
+order by total_score desc, h.hacker_id
+;
+
+Advanced Join
+SET sql_mode = '';
+SELECT Start_Date, End_Date
+FROM 
+    (SELECT Start_Date FROM Projects WHERE Start_Date NOT IN (SELECT End_Date FROM Projects)) a,
+    (SELECT End_Date FROM Projects WHERE End_Date NOT IN (SELECT Start_Date FROM Projects)) b 
+WHERE Start_Date < End_Date
+GROUP BY Start_Date 
+ORDER BY DATEDIFF(End_Date, Start_Date), Start_Date
+
+Select S.Name
+From ( Students S join Friends F Using(ID)
+       join Packages P1 on S.ID=P1.ID
+       join Packages P2 on F.Friend_ID=P2.ID)
+Where P2.Salary > P1.Salary
+Order By P2.Salary;
